@@ -1,62 +1,33 @@
-/* styles.css */
-
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  
-  form {
-    margin: 20px;
-  }
-  
-  label,
-  textarea,
-  input[type="submit"] {
+    padding: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
     display: block;
-    width: 100%;
-    box-sizing: border-box;
+    font-weight: bold;
     margin-bottom: 10px;
-    font-size: 18px;
-  }
-  
-  textarea {
-    height: 200px;
-  }
-  
-  input[type="submit"] {
-    background-color: #4caf50;
+}
+
+input[type="text"], input[type="submit"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+input[type="submit"] {
+    background-color: #4CAF50;
     color: white;
-    font-weight: bold;
     cursor: pointer;
-    border: none;
-    height: 50px;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-  }
-  
-  td,
-  th {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
-  
-  tr:nth-child(even) {
-    background-color: #dddddd;
-  }
-  
-  .real {
-    color: #4caf50;
+}
+
+p {
+    font-size: 18px;
     font-weight: bold;
-  }
-  
-  .fake {
-    color: #f44336;
-    font-weight: bold;
-  }
-  
+    margin-top: 20px;
+}

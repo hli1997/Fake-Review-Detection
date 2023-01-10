@@ -1,8 +1,5 @@
 import pandas as pd
-import numpy as np
-import seaborn as sns
 from bs4 import BeautifulSoup  
-from selenium import webdriver
 
 from selenium.webdriver.support import expected_conditions as EC
 from sklearn.model_selection import train_test_split
@@ -12,8 +9,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 import string
 import re
-
+import requests
 from flask import Flask, request, render_template
+from bs4 import BeautifulSoup  
+import time
+from urllib.parse import urlparse
+from urllib.parse import urljoin
 
 df_test = pd.read_csv("Data/train.csv")
 df_test = df_test.drop(["category", "rating"], axis = 1)
@@ -87,15 +88,7 @@ def rfPrediction(review):
 
     return pred_RFC[0]
 
-def is_real_review(review):
-    result1 = lrPrediction(review)  # call first algorithm
-    result2 = dtPrediction(review)  # call second algorithm
-    result3 = rfPrediction(review)  # call third algorithm
-    total = result1 + result2 + result3
-    if total >= 2:
-        return "real"
-    else:
-        return "fake"
+
 
 app = Flask(__name__)
 
@@ -106,9 +99,62 @@ def form():
 
 @app.route('/detect', methods=['POST'])
 def detect():
-    review = request.form['review']
-    result = is_real_review(review)  # call your function here
-    return render_template('index.html', result=result)
+    url = request.form['url']
+    reviews = scrape_reviews(url) 
+    real_count = 0
+    for review in reviews:
+        result = is_real_review(review)
+        if result:
+            real_count += 1
+    total_count = len(reviews)
+    if total_count == 0:
+        percentage = 0
+    else:
+        percentage = real_count / total_count * 100
+    return render_template('index.html', percentage=percentage)
+
+def scrape_reviews(url):
+    reviews = []
+    parsed_url = urlparse(url)
+    base_url = parsed_url.scheme + '://' + parsed_url.netloc
+    while True:
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
+        for i in range(3):  # retry the request up to 3 times
+            try:
+                r = requests.get(url, headers=headers)
+                html_content = r.text
+                break  
+            except requests.exceptions.RequestException:
+                time.sleep(1)  
+        else:  
+            raise requests.exceptions.RequestException('Error: the request was not successful')
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        review_elements = soup.find_all(class_='a-size-base review-text review-text-content')
+        for element in review_elements:
+            review = element.get_text()
+            reviews.append(review)
+        # find the "Next" button element
+        next_button = soup.find(class_='a-last')
+        # check if the "Next" button element exists
+        if next_button is None:
+            print('dddd')
+            break
+        # if the "Next" button exists, get the URL of the next page
+        next_url = next_button.get('href')
+        url =  urljoin(base_url , next_url)
+    return reviews
+
+def is_real_review(review):
+    result1 = lrPrediction(review)  # call first algorithm
+    result2 = dtPrediction(review)  # call second algorithm
+    result3 = rfPrediction(review)  # call third algorithm
+    total = result1 + result2 + result3
+    if total >= 2:
+        return True
+    else:
+        return False
 
 if __name__ == '__main__':
     app.run()

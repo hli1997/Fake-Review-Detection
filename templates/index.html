@@ -9,19 +9,12 @@
 </head>
 <body>
     <form method="POST" action="/detect">
-        <label for="review">Enter your review:</label><br>
-        <textarea name="review" id="review"></textarea><br>
+        <label for="url">Enter the Amazon product URL:</label><br>
+        <input type="text" name="url" id="url"><br>
         <input type="submit" value="Submit">
-    </form> 
-    <table>
-        <!-- table content -->
-    </table>
-    {% if result == "real" %}
-    <div class="real">Real review</div>
-    {% else %}
-        {% if result == "fake" %}
-            <div class="fake">Fake review</div>
-        {% endif %}
-    {% endif %}
+      </form>
+    {% if percentage %}
+    <p>Percentage of real reviews: {{ percentage }}%</p>
+  {% endif %}
 </body>
 </html>
